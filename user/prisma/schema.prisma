@@ -1,0 +1,120 @@
+
+
+generator client {
+	provider = "prisma-client"
+	output = "../generated/prisma"
+	engineType = "client"
+	runtime = "bun"
+}
+
+datasource db {
+	provider = "postgresql"
+}
+
+model User {
+  id  String  @id  @default(uuid())
+  phone String? @unique
+  email String? @unique 
+  name String 
+  password String?
+  status STATUS @default(ACTIVE)
+  profile Profile?
+  // role UserRoleMap[]
+  preference UserPreference?
+  devices UserDevice[]
+  savedLocations SavedLocation[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+  deletedAt DateTime?
+  @@index([status])
+}
+
+model Profile {
+  id     String     @id @default(uuid())
+  profileImageUrl  String?
+  dob DateTime?
+  gender GENDER ?
+  preferredLanguage String?
+  userId String    @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade) 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+}
+
+// model UserRole {
+//   id String @id @default(uuid())
+//   name String
+//   description String
+//   userRoleMap UserRoleMap?
+//   createdAt DateTime @default(now())
+// }
+
+// model UserRoleMap {
+//   id String @id @default(uuid())
+
+//   userId String
+//   roleId String
+
+//   user User @relation(fields: [userId], references: [id])
+//   role UserRole @relation(fields: [roleId], references: [id])
+
+//   @@unique([userId, roleId])
+// }
+
+model UserDevice {
+  id String @id @default(uuid())
+  userId String @unique
+  deviceId String @unique
+  deviceType String 
+  deviceToken String?
+  isActive Boolean @default(true)
+  lastSeenAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  @@index([userId])
+}
+
+model UserPreference {
+  userId String @id
+  user User @relation(fields: [userId],references: [id],onDelete: Cascade)
+  currency String @default("INR")
+  notificationEnabled Boolean @default(true)
+  ridePreference Json?
+  updatedAt DateTime @updatedAt
+}
+
+model SavedLocation {
+  id String @id @default(uuid())
+  userId String
+  label String
+  address String
+  latitude  Decimal @db.Decimal(10, 7)
+  longitude Decimal @db.Decimal(10, 7)
+
+  isDefault Boolean @default(false)
+
+  user User @relation(fields: [userId],references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+enum STATUS {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum GENDER {
+  MALE
+  FEMALE
+  OTHER
+}
+
+// enum DEVICETYPE {
+//   ANDROID
+//   IOS
+//   WEB
+// }

@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:14.23-alpine3.24
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: prisma
+      POSTGRES_DB: postgres
+    ports:
+      - 5432:5432
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
