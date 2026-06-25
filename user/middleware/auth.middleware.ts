@@ -11,7 +11,7 @@ const logger = pino();
 export function verifyToken(
   req: AuthRequest,
   _res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   try {
     const authHeader = req.headers.authorization;

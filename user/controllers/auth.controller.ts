@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { loginSchema, registerSchema } from "../validators/auth.schema";
-import * as authService  from "../services/auth.service";
+import * as authService from "../services/auth.service";
 
 const registerController = async (req: Request, res: Response) => {
   const data = registerSchema.parse(req.body);

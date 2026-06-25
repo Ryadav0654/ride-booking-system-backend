@@ -1,8 +1,4 @@
-import type {
-  Request,
-  Response,
-  NextFunction,
-} from "express";
+import type { Request, Response, NextFunction } from "express";
 import { Prisma } from "../generated/prisma/client";
 import { ZodError } from "zod";
 import { AppError } from "../errors/app-error";
@@ -13,7 +9,6 @@ export const globalErrorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-
   if (err instanceof ZodError) {
     return res.status(400).json({
       success: false,
@@ -21,7 +16,7 @@ export const globalErrorHandler = (
       reqId: req.id,
       error: {
         code: "VALIDATION_ERROR",
-        details: err.issues.map(issue => ({
+        details: err.issues.map((issue) => ({
           path: issue.path.join("."),
           message: issue.message,
         })),
@@ -39,10 +34,7 @@ export const globalErrorHandler = (
     });
   }
 
-  if (
-    err instanceof Prisma.PrismaClientKnownRequestError
-  ) {
-
+  if (err instanceof Prisma.PrismaClientKnownRequestError) {
     if (err.code === "P2002") {
       return res.status(409).json({
         success: false,
@@ -64,9 +56,7 @@ export const globalErrorHandler = (
     });
   }
 
-  if (
-    err instanceof Prisma.PrismaClientInitializationError
-  ) {
+  if (err instanceof Prisma.PrismaClientInitializationError) {
     return res.status(503).json({
       success: false,
       message: "Database unavailable",

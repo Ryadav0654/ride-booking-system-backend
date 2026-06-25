@@ -20,6 +20,14 @@ app.get("/api/v1/health", (_req, res) => {
     .json({ message: "healthy", timestamp: new Date().toISOString() });
 });
 
+app.use((_req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "The requested resource was not found",
+    error: { code: "NOT_FOUND" },
+  });
+});
+
 app.use(globalErrorHandler);
 
 export default app;

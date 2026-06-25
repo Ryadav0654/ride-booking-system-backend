@@ -8,21 +8,19 @@ export const updateUserSchema = z
       .min(2, "Name must be at least 2 characters")
       .max(64, "Name must not exceed 64 characters")
       .optional(),
-    email: z
-      .email("Invalid email address")
-      .trim()
-      .toLowerCase()
-      .optional(),
+    email: z.email("Invalid email address").trim().toLowerCase().optional(),
     phone: z
       .string()
       .trim()
-      .regex(/^\+[1-9]\d{6,14}$/, "Phone must be in E.164 format (e.g. +919876543210)")
+      .regex(
+        /^\+[1-9]\d{6,14}$/,
+        "Phone must be in E.164 format (e.g. +919876543210)"
+      )
       .optional(),
   })
-  .refine(
-    (data) => Object.values(data).some((v) => v !== undefined),
-    { message: "At least one field (name, email, phone) must be provided" },
-  );
+  .refine((data) => Object.values(data).some((v) => v !== undefined), {
+    message: "At least one field (name, email, phone) must be provided",
+  });
 
 export const updateProfileSchema = z
   .object({
@@ -36,9 +34,7 @@ export const updateProfileSchema = z
         error: "Gender must be MALE, FEMALE, or OTHER",
       })
       .optional(),
-    profileImageUrl: z
-      .url("Invalid URL for profile image")
-      .optional(),
+    profileImageUrl: z.url("Invalid URL for profile image").optional(),
     preferredLanguage: z
       .string()
       .trim()
@@ -46,10 +42,9 @@ export const updateProfileSchema = z
       .max(10, "Language code must not exceed 10 characters")
       .optional(),
   })
-  .refine(
-    (data) => Object.values(data).some((v) => v !== undefined),
-    { message: "At least one profile field must be provided" },
-  );
+  .refine((data) => Object.values(data).some((v) => v !== undefined), {
+    message: "At least one profile field must be provided",
+  });
 
 export const registerDeviceSchema = z.object({
   deviceId: z.uuidv4("deviceId must be a valid UUID v4"),

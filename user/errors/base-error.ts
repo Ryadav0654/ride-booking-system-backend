@@ -7,9 +7,6 @@ export class BaseError extends Error {
   ) {
     super(message);
 
-    Error.captureStackTrace(
-      this,
-      this.constructor
-    );
+    Error.captureStackTrace(this, this.constructor);
   }
 }

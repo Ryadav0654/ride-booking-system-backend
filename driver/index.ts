@@ -1,10 +1,9 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import app from "./app";
+import app from "./app.js";
+import { config } from "./src/config/env.js";
 
-const PORT = process.env.PORT || 3001;
-
-app.listen(PORT, () => {
-  console.log("Server is running on port 3000");
+app.listen(config.port, () => {
+  console.log(`Driver Service running on port ${config.port}`);
 });

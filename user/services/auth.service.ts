@@ -64,7 +64,7 @@ export const login = async (data: {
 
   const isPasswordValid = await Bun.password.verify(
     password,
-    user.password as string,
+    user.password as string
   );
 
   if (!isPasswordValid) {

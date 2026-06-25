@@ -31,7 +31,7 @@ import {
  */
 export const getUserController = async (
   req: AuthRequest,
-  res: Response,
+  res: Response
 ): Promise<void> => {
   const userId = req.user!.id;
 
@@ -50,7 +50,7 @@ export const getUserController = async (
  */
 export const updateUserController = async (
   req: AuthRequest,
-  res: Response,
+  res: Response
 ): Promise<void> => {
   const userId = req.user!.id;
 
@@ -77,7 +77,7 @@ export const updateUserController = async (
  */
 export const getProfileController = async (
   req: AuthRequest,
-  res: Response,
+  res: Response
 ): Promise<void> => {
   const userId = req.user!.id;
 
@@ -96,7 +96,7 @@ export const getProfileController = async (
  */
 export const updateProfileController = async (
   req: AuthRequest,
-  res: Response,
+  res: Response
 ): Promise<void> => {
   const userId = req.user!.id;
 
@@ -121,7 +121,7 @@ export const updateProfileController = async (
  */
 export const getDevicesController = async (
   req: AuthRequest,
-  res: Response,
+  res: Response
 ): Promise<void> => {
   const userId = req.user!.id;
 
@@ -144,7 +144,7 @@ export const getDevicesController = async (
  */
 export const registerDeviceController = async (
   req: AuthRequest,
-  res: Response,
+  res: Response
 ): Promise<void> => {
   const userId = req.user!.id;
 
@@ -166,7 +166,7 @@ export const registerDeviceController = async (
  */
 export const removeDeviceController = async (
   req: AuthRequest,
-  res: Response,
+  res: Response
 ): Promise<void> => {
   const userId = req.user!.id;
 

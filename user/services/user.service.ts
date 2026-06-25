@@ -44,7 +44,7 @@ export async function getUserById(userId: string): Promise<UserAccountDto> {
  */
 export async function updateUser(
   userId: string,
-  data: UpdateUserDto,
+  data: UpdateUserDto
 ): Promise<UserAccountDto> {
   // Ensure user exists
   const existing = await prisma.user.findUnique({
@@ -66,7 +66,7 @@ export async function updateUser(
       throw new AppError(
         409,
         "Email is already in use",
-        "EMAIL_ALREADY_EXISTS",
+        "EMAIL_ALREADY_EXISTS"
       );
     }
   }
@@ -81,7 +81,7 @@ export async function updateUser(
       throw new AppError(
         409,
         "Phone number is already in use",
-        "PHONE_ALREADY_EXISTS",
+        "PHONE_ALREADY_EXISTS"
       );
     }
   }
@@ -155,7 +155,7 @@ export async function getProfile(userId: string): Promise<UserProfileDto> {
  */
 export async function upsertProfile(
   userId: string,
-  data: UpdateProfileDto,
+  data: UpdateProfileDto
 ): Promise<UserProfileDto> {
   const userExists = await prisma.user.findUnique({
     where: { id: userId },
@@ -248,7 +248,7 @@ export async function getDevices(userId: string): Promise<UserDeviceDto[]> {
  */
 export async function registerDevice(
   userId: string,
-  data: RegisterDeviceDto,
+  data: RegisterDeviceDto
 ): Promise<UserDeviceDto> {
   const userExists = await prisma.user.findUnique({
     where: { id: userId },
@@ -269,7 +269,7 @@ export async function registerDevice(
     throw new AppError(
       409,
       "Device is already registered to another account",
-      "DEVICE_CONFLICT",
+      "DEVICE_CONFLICT"
     );
   }
 
@@ -309,7 +309,7 @@ export async function registerDevice(
  */
 export async function removeDevice(
   userId: string,
-  deviceId: string,
+  deviceId: string
 ): Promise<void> {
   const device = await prisma.userDevice.findUnique({
     where: { deviceId },
