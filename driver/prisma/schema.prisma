@@ -1,0 +1,178 @@
+generator client {
+  provider   = "prisma-client"
+  output     = "../generated/prisma"
+  engineType = "client"
+  runtime    = "bun"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// DRIVER
+// Core driver entity. userId is a plain String (UUID) — NOT a FK to User
+// because cross-service foreign keys break microservice independence.
+// If User Service deletes a user, Driver Service handles it via an async
+// Kafka event (user.deleted), not a DB cascade.
+// ---------------------------------------------------------------------------
+model Driver {
+  id               String             @id @default(uuid())
+  userId           String             @unique
+  licenseNumber    String             @unique
+  licenseExpiry    DateTime
+  onboardingStatus OnboardingStatus   @default(PENDING)
+  isOnline         Boolean            @default(false)
+
+  vehicles         DriverVehicle[]
+  documents        DriverDocument[]
+  availability     DriverAvailability?
+  stats            DriverStats?
+
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  deletedAt        DateTime?
+
+  @@index([userId])
+  @@index([onboardingStatus])
+  @@index([isOnline])
+}
+
+// ---------------------------------------------------------------------------
+// DRIVER VEHICLE
+// A driver may have multiple vehicles. Only one should be ACTIVE at a time
+// — enforced in the service layer. registrationNumber is globally unique.
+// ---------------------------------------------------------------------------
+model DriverVehicle {
+  id                 String        @id @default(uuid())
+  driverId           String
+  registrationNumber String        @unique
+  make               String
+  model              String
+  color              String
+  year               Int
+  vehicleType        VehicleType
+  status             VehicleStatus @default(PENDING_VERIFICATION)
+
+  driver             Driver        @relation(fields: [driverId], references: [id], onDelete: Cascade)
+
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  @@index([driverId])
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// DRIVER DOCUMENT
+// Stores URL references to uploaded documents, not blobs.
+// Files live in object storage (S3/GCS). Multiple submissions per type
+// are allowed — history preserved for audit, latest used for verification.
+// ---------------------------------------------------------------------------
+model DriverDocument {
+  id                 String                    @id @default(uuid())
+  driverId           String
+  documentType       DocumentType
+  documentUrl        String
+  verificationStatus DocumentVerificationStatus @default(PENDING)
+  rejectionReason    String?
+
+  driver             Driver                    @relation(fields: [driverId], references: [id], onDelete: Cascade)
+
+  createdAt          DateTime                  @default(now())
+  updatedAt          DateTime                  @updatedAt
+
+  @@index([driverId])
+  @@index([driverId, documentType])
+  @@index([verificationStatus])
+}
+
+// ---------------------------------------------------------------------------
+// DRIVER AVAILABILITY
+// Separated from Driver so high-frequency status updates don't lock the
+// main Driver row. Designed to be mirrored 1:1 to Redis for sub-ms reads.
+// TTL in Redis acts as a heartbeat — driver auto-OFFLINE if app crashes.
+// lastSeenAt is updated on every location ping from the driver's app.
+// ---------------------------------------------------------------------------
+model DriverAvailability {
+  id         String             @id @default(uuid())
+  driverId   String             @unique
+  status     AvailabilityStatus @default(OFFLINE)
+  lastSeenAt DateTime           @default(now())
+
+  driver     Driver             @relation(fields: [driverId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+
+  @@index([status])
+  @@index([lastSeenAt])
+}
+
+// ---------------------------------------------------------------------------
+// DRIVER STATS
+// Aggregate counters separated from Driver because Trip Service writes here
+// on every trip completion — isolating writes prevents row contention.
+// averageRating is Decimal(3,2) — stores values like 4.87.
+// ---------------------------------------------------------------------------
+model DriverStats {
+  id             String   @id @default(uuid())
+  driverId       String   @unique
+  totalTrips     Int      @default(0)
+  completedTrips Int      @default(0)
+  cancelledTrips Int      @default(0)
+  averageRating  Decimal  @default(0.00) @db.Decimal(3, 2)
+
+  driver         Driver   @relation(fields: [driverId], references: [id], onDelete: Cascade)
+
+  updatedAt      DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// ENUMS
+// ---------------------------------------------------------------------------
+
+enum OnboardingStatus {
+  PENDING
+  DOCUMENTS_SUBMITTED
+  VERIFIED
+  REJECTED
+}
+
+enum AvailabilityStatus {
+  OFFLINE
+  ONLINE
+  BUSY
+}
+
+enum VehicleType {
+  SEDAN
+  SUV
+  HATCHBACK
+  AUTO_RICKSHAW
+  BIKE
+  LUXURY
+  MINIVAN
+}
+
+enum VehicleStatus {
+  PENDING_VERIFICATION
+  ACTIVE
+  INACTIVE
+  REJECTED
+}
+
+enum DocumentType {
+  DRIVING_LICENSE
+  VEHICLE_REGISTRATION
+  VEHICLE_INSURANCE
+  PAN_CARD
+  AADHAAR_CARD
+  PROFILE_PHOTO
+}
+
+enum DocumentVerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}

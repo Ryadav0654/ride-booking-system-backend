@@ -8,7 +8,7 @@ export const generateAccessToken = (sub: string, email: string) => {
       email,
     },
     config.accessTokenSecret,
-    { expiresIn: "1d" },
+    { expiresIn: "1d" }
   );
 
   return accessToken;
@@ -21,7 +21,7 @@ export const generateRefreshToken = (sub: string, email: string) => {
       email,
     },
     config.refreshTokenSecret,
-    { expiresIn: "7d" },
+    { expiresIn: "7d" }
   );
 
   return refreshToken;
