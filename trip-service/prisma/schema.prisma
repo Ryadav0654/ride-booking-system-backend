@@ -1,0 +1,108 @@
+generator client {
+  provider   = "prisma-client"
+  output     = "../generated/prisma"
+  engineType = "client"
+  runtime    = "bun"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// TRIP
+// Core trip entity representing a ride booking lifecycle.
+// ---------------------------------------------------------------------------
+model Trip {
+  id               String               @id @default(uuid())
+  riderId          String
+  driverId         String?
+  pickupLatitude   Decimal              @db.Decimal(10, 7)
+  pickupLongitude  Decimal              @db.Decimal(10, 7)
+  dropLatitude     Decimal              @db.Decimal(10, 7)
+  dropLongitude    Decimal              @db.Decimal(10, 7)
+  estimatedFare    Decimal              @db.Decimal(10, 2)
+  finalFare        Decimal?             @db.Decimal(10, 2)
+  distance         Decimal              @db.Decimal(10, 2) // Distance in kilometers
+  duration         Int                  // Estimated or actual duration in seconds
+  paymentMethod    PaymentMethod
+  rideType         RideType
+  status           TripStatus           @default(REQUESTED)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  statusHistory    TripStatusHistory[]
+  cancellation     TripCancellation?
+
+  @@index([riderId])
+  @@index([driverId])
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// TRIP STATUS HISTORY
+// Audit log of all state transitions for analytical and tracking purposes.
+// ---------------------------------------------------------------------------
+model TripStatusHistory {
+  id             String      @id @default(uuid())
+  tripId         String
+  previousStatus TripStatus?
+  currentStatus  TripStatus
+  changedBy      ActorRole
+  timestamp      DateTime    @default(now())
+
+  trip           Trip        @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@index([tripId])
+}
+
+// ---------------------------------------------------------------------------
+// TRIP CANCELLATION
+// Details logged when a trip is cancelled before completion.
+// ---------------------------------------------------------------------------
+model TripCancellation {
+  id           String      @id @default(uuid())
+  tripId       String      @unique
+  cancelledBy  ActorRole
+  reason       String
+  cancelledAt  DateTime    @default(now())
+
+  trip         Trip        @relation(fields: [tripId], references: [id], onDelete: Cascade)
+}
+
+// ---------------------------------------------------------------------------
+// ENUMS
+// ---------------------------------------------------------------------------
+
+enum TripStatus {
+  REQUESTED
+  SEARCHING
+  DRIVER_ASSIGNED
+  DRIVER_ARRIVED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  WALLET
+}
+
+enum RideType {
+  SEDAN
+  SUV
+  HATCHBACK
+  AUTO_RICKSHAW
+  BIKE
+  LUXURY
+  MINIVAN
+}
+
+enum ActorRole {
+  RIDER
+  DRIVER
+  SYSTEM
+  ADMIN
+}
