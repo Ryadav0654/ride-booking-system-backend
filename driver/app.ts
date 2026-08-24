@@ -7,6 +7,8 @@ const app: Express = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use("/api/v1/drivers", driverRouter);
+
 app.get("/api/v1/health", (_req, res) => {
   res.status(200).json({
     success: true,
@@ -15,7 +17,6 @@ app.get("/api/v1/health", (_req, res) => {
   });
 });
 
-app.use("/api/v1/drivers", driverRouter);
 
 app.use((_req, res) => {
   res.status(404).json({

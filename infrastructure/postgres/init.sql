@@ -1,0 +1,3 @@
+CREATE DATABASE users_db;
+CREATE DATABASE drivers_db;
+CREATE DATABASE trips_db;
